@@ -101,7 +101,7 @@
   /* ---------- Layout ---------- */
   .layout{
     display: grid;
-    grid-template-columns: minmax(300px, 560px) 1fr;
+    grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
     gap: 32px;
     align-items: start;
   }
@@ -113,8 +113,11 @@
   /* ---------- Board area with axis labels ---------- */
   .board-area{
     display: grid;
-    grid-template-columns: 22px 1fr;
-    grid-template-rows: 1fr 22px;
+    grid-template-columns: 18px minmax(0, 1fr);
+    grid-template-rows: 1fr 18px;
+    min-width: 0;
+    width: 100%;
+    max-width: 380px;
   }
  
   .col-labels{
@@ -143,7 +146,9 @@
     grid-row: 1;
     position: relative;
     border: 2px solid var(--line-major);
-    padding: 8px;
+    padding: 6px;
+    min-width: 0;
+    width: 100%;
   }
   .board-frame::before, .board-frame::after,
   .board-frame .tick-tr, .board-frame .tick-bl{
@@ -161,8 +166,9 @@
  
   #board{
     display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(9, 1fr);
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    grid-template-rows: repeat(9, minmax(0, 1fr));
+    width: 100%;
     aspect-ratio: 1 / 1;
     background: var(--bg-panel);
   }
@@ -172,9 +178,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
     border: 1px solid var(--line-minor);
     font-family: 'IBM Plex Mono', monospace;
-    font-size: clamp(14px, 2.6vw, 22px);
+    font-size: clamp(10px, 2vw, 16px);
     font-weight: 500;
     color: var(--cyan);
     background: transparent;
@@ -182,6 +192,8 @@
     outline: none;
     caret-color: var(--amber);
     padding: 0;
+    appearance: none;
+    -webkit-appearance: none;
   }
   .cell:focus{ background: rgba(242,166,90,0.10); }
   .cell.given{ color: var(--ink); font-weight: 600; }

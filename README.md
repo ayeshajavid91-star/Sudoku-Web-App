@@ -2,7 +2,7 @@
 
 An intelligent Sudoku Solver and Puzzle Generator featuring both a robust **C++ console application** and a fully interactive **browser-based web app** powered by the same recursive backtracking algorithm.
 
-**🔗 Live Demo:** [https://ayeshajavid91-star.github.io/InternGrow_SudokuSolver/](https://ayeshajavid91-star.github.io/InternGrow_SudokuSolver/)
+**🔗 Live Demo:** [https://ayeshajavid91-star.github.io/Sudoku-Web-App/](https://ayeshajavid91-star.github.io/Sudoku-Web-App/)
 
 ---
 
@@ -45,7 +45,7 @@ Both versions share the same core logic: a recursive backtracking algorithm for 
 
 The web version is deployed via **GitHub Pages** and works entirely in the browser:
 
-👉 **[Play it here](https://ayeshajavid91-star.github.io/InternGrow_SudokuSolver/)**
+👉 **[Play it here](https://ayeshajavid91-star.github.io/Sudoku-Web-App/)**
 
 Since GitHub Pages only hosts static files (HTML/CSS/JS), the JavaScript version was built to bring the same backtracking logic from the C++ program into a format that runs live in any browser.
 
@@ -57,8 +57,8 @@ Since GitHub Pages only hosts static files (HTML/CSS/JS), the JavaScript version
 No installation needed — just open the live demo link above, or run it locally:
 
 ```bash
-git clone https://github.com/ayeshajavid91-star/InternGrow_SudokuSolver.git
-cd InternGrow_SudokuSolver
+git clone https://github.com/ayeshajavid91-star/Sudoku-Web-App.git
+cd Sudoku-Web-App
 ```
 
 Then simply open `index.html` in your browser.
@@ -86,7 +86,7 @@ Both versions rely on the same core approach:
 ## 📂 Project Structure
 
 ```
-InternGrow_SudokuSolver/
+Sudoku-Web-App/
 ├── index.html          # Web version (playable on GitHub Pages)
 ├── sudoku.cpp           # C++ console version
 └── README.md

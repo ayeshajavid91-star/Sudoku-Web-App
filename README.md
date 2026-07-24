@@ -1,65 +1,132 @@
-# InternGrow_SudokuSolver
+# 🧩 Sudoku Solver & Generator
 
-## 📌 Project Overview
-**Intelligent Sudoku Solver & Generator** is a C++ console application developed as part of the **InternGrow C++ Programming Track (Module 1 – Task 3)**. It represents a Sudoku grid using a 2D array and applies a recursive backtracking algorithm to solve any valid puzzle. It also includes a puzzle generator engine that creates new, unique Sudoku puzzles at different difficulty levels.
+An intelligent Sudoku Solver and Puzzle Generator featuring both a robust **C++ console application** and a fully interactive **browser-based web app** powered by the same recursive backtracking algorithm.
 
-## 🚀 Features
+**🔗 Live Demo:** [https://ayeshajavid91-star.github.io/InternGrow_SudokuSolver/](https://ayeshajavid91-star.github.io/InternGrow_SudokuSolver/)
 
-### Core Features
-- Represents the Sudoku board as a 9x9 2D array
-- Accepts manual input of an unsolved puzzle (0 for empty cells)
-- Solves the puzzle using a **recursive backtracking algorithm**
-- Validates every number placement against row, column, and 3x3 box rules
-- Clean, formatted grid display in the console
+---
 
-### 🧩 Upgrade Feature — Puzzle Generator Engine
-- Generates a complete, valid, randomly filled Sudoku solution using backtracking with randomized number ordering
-- Removes cells from the solved grid to create a playable puzzle
-- Supports three **difficulty levels**:
-  - Easy (32 cells removed)
-  - Medium (42 cells removed)
-  - Hard (52 cells removed)
-- Option to reveal the full solution after generating a puzzle
-- Produces a different, unique puzzle every time the program runs
+## 📖 Overview
 
-## 🛠️ Tech Stack
-- **Language:** C++
-- **Concepts Used:** 2D Arrays, Recursion, Backtracking, Functions, Randomization (rand/srand)
+This project started as a C++ console-based Sudoku solver and generator, and was later extended into a fully playable, interactive **web version** so it can be experienced directly in the browser via GitHub Pages — no compiler required.
 
-## ⚙️ How It Works
-1. **Solving:** The algorithm finds the first empty cell, tries numbers 1–9, and checks validity against the row, column, and 3x3 box. If a number leads to a dead end later, it backtracks and tries the next number.
-2. **Generating:** The same backtracking logic is used to fill an empty grid completely (with randomized number order for uniqueness), then a set number of cells are randomly cleared based on the chosen difficulty.
+This project reflects hands-on practice in C++ programming, algorithm design, and web development.
 
-## ▶️ How to Run
-1. Compile the program:
-g++ Sudoku_Solver.cpp -o Sudoku_Solver
+Both versions share the same core logic: a recursive backtracking algorithm for solving puzzles and a constrained shuffling technique for generating valid, unique Sudoku puzzles at different difficulty levels.
 
-2. Run the executable:
-./Sudoku_Solver
+---
 
-3. Choose an option from the menu:
-1. Solve a Sudoku (manual input)
-2. Generate a new puzzle (choose difficulty)
-3. Exit
+## ✨ Features
 
-## 📸 Sample Output
-===== Generated Sudoku Puzzle =====
-6 . 2 | . 7 . | 5 4 1
-. 8 4 | 3 . 1 | . . .
-. . 5 | . 2 . | . 8 3
+### 🌐 Web Version (JavaScript / HTML / CSS)
+- Interactive 9×9 Sudoku grid with manual input
+- **Solve** puzzles instantly using recursive backtracking
+- **Generate** new puzzles with selectable difficulty — Easy / Medium / Hard
+- **Reveal Solution** and **Clear Grid** options
+- Real-time invalid-number detection with red highlighting on conflicts
+- Keyboard arrow-key navigation across the grid
+- **Hint system** — reveals the correct number for the selected (or next empty) cell
+- **Win detection** — success banner when the puzzle is completed correctly
+- **Timer** and **move counter** to track solving progress
+- **Undo** — revert the last move
+- **Notes / Pencil marks** — jot down multiple candidate numbers per cell
+- **Mobile-friendly number pad** for touch input
+- Given (clue) cells are locked and cannot be overwritten, following real Sudoku rules
 
-------+-------+------
-8 . 3 | 5 6 4 | . . 9
-5 . 6 | 2 9 . | 8 . .
-2 4 9 | 1 8 7 | 3 5 6
+### 💻 C++ Console Version
+- Sudoku grid represented as a 2D array
+- Recursive backtracking algorithm for solving any valid puzzle
+- Puzzle generation logic with adjustable difficulty
+- Clean, structured console-based interface
 
-------+-------+------
-9 . . | 6 . 2 | 4 3 7
-. . . | . 3 5 | . 2 8
-3 . 1 | . 4 . | 9 6 .
+---
 
-## 🎓 About InternGrow
-This project was developed as part of the **InternGrow C++ Programming Track**, a project-based internship program focused on providing hands-on programming experience.
+## 🚀 Live Demo (Web Version)
 
-## 👤 Author
-Developed by [Your Name] as part of InternGrow Internship — Module 1.
+The web version is deployed via **GitHub Pages** and works entirely in the browser:
+
+👉 **[Play it here](https://ayeshajavid91-star.github.io/InternGrow_SudokuSolver/)**
+
+Since GitHub Pages only hosts static files (HTML/CSS/JS), the JavaScript version was built to bring the same backtracking logic from the C++ program into a format that runs live in any browser.
+
+---
+
+## 🛠️ How to Run
+
+### ▶️ Web Version
+No installation needed — just open the live demo link above, or run it locally:
+
+```bash
+git clone https://github.com/ayeshajavid91-star/InternGrow_SudokuSolver.git
+cd InternGrow_SudokuSolver
+```
+
+Then simply open `index.html` in your browser.
+
+### ▶️ C++ Console Version
+
+```bash
+g++ -o sudoku sudoku.cpp
+./sudoku
+```
+
+> Replace `sudoku.cpp` with the actual filename of the C++ source file in this repository.
+
+---
+
+## 🧠 Algorithm
+
+Both versions rely on the same core approach:
+
+1. **Backtracking Solver** — recursively tries valid numbers (1–9) in empty cells, backtracking whenever a placement violates Sudoku rules (row, column, or 3×3 box constraints).
+2. **Puzzle Generator** — starts from a fully solved, randomly shuffled valid grid, then removes numbers according to the selected difficulty level while preserving a solvable, unique puzzle.
+
+---
+
+## 📂 Project Structure
+
+```
+InternGrow_SudokuSolver/
+├── index.html          # Web version (playable on GitHub Pages)
+├── sudoku.cpp           # C++ console version
+└── README.md
+```
+
+---
+
+## 🏷️ Suggested GitHub Topics
+
+Add these under **Repo → About → Topics** to improve discoverability:
+
+```
+sudoku
+sudoku-solver
+sudoku-generator
+cpp
+javascript
+html-css-javascript
+backtracking-algorithm
+recursion
+github-pages
+web-app
+puzzle-game
+programming-project
+```
+
+---
+
+## 👩‍💻 Author
+
+Developed by **Ayesha Javid**.
+
+---
+
+## 📄 License
+
+**All Rights Reserved.**
+
+This project and its source code are the intellectual property of the author. No part of this repository — including the code, design, or documentation — may be copied, modified, distributed, used, or reproduced in any form without the explicit written permission of the author.
+
+© 2026 Ayesha Javid. Unauthorized use is strictly prohibited.
+
+For permissions or licensing inquiries, contact: **ayeshajavid91@gmail.com**

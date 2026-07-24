@@ -19,6 +19,7 @@
     --amber: #f2a65a;
     --cyan: #6fe7dd;
     --red: #ff7a7a;
+    --green: #8fe0a0;
     --radius: 2px;
   }
  
@@ -40,7 +41,6 @@
     background-size: 28px 28px;
     background-position: -1px -1px;
     background-color: var(--bg);
-    opacity: 1;
   }
  
   .page{
@@ -173,8 +173,20 @@
     background: var(--bg-panel);
   }
  
-  .cell{
+  .cell-wrap{
     position: relative;
+    border: 1px solid var(--line-minor);
+    min-width: 0;
+    min-height: 0;
+  }
+  .cell-wrap:nth-child(3n){ border-right: 2px solid var(--line-major); }
+  .cell-wrap:nth-child(9n+1){ border-left: 2px solid var(--line-major); }
+  #board .cell-wrap:nth-child(-n+9){ border-top: 2px solid var(--line-major); }
+  .cell-wrap.row-thick{ border-bottom: 2px solid var(--line-major) !important; }
+ 
+  .cell{
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -182,7 +194,7 @@
     height: 100%;
     min-width: 0;
     min-height: 0;
-    border: 1px solid var(--line-minor);
+    border: none;
     font-family: 'IBM Plex Mono', monospace;
     font-size: clamp(10px, 2vw, 16px);
     font-weight: 500;
@@ -194,16 +206,39 @@
     padding: 0;
     appearance: none;
     -webkit-appearance: none;
+    z-index: 2;
   }
-  .cell:focus{ background: rgba(242,166,90,0.10); }
   .cell.given{ color: var(--ink); font-weight: 600; }
   .cell.solved{ color: var(--cyan); }
+  .cell.hinted{ color: var(--amber); }
   .cell.invalid{ color: var(--red); background: rgba(255,122,122,0.12); }
+  .cell-wrap.selected{ box-shadow: inset 0 0 0 2px var(--amber); }
+  .cell-wrap.selected::after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(242,166,90,0.08);
+    pointer-events: none;
+    z-index: 1;
+  }
  
-  .cell:nth-child(3n){ border-right: 2px solid var(--line-major); }
-  .cell:nth-child(9n+1){ border-left: 2px solid var(--line-major); }
-  #board .cell:nth-child(-n+9){ border-top: 2px solid var(--line-major); }
-  .row-thick{ border-bottom: 2px solid var(--line-major) !important; }
+  .notes{
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .notes span{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(6px, 1.1vw, 9px);
+    color: var(--muted);
+    line-height: 1;
+  }
  
   .caption{
     grid-column: 2;
@@ -215,6 +250,32 @@
     display: flex;
     justify-content: space-between;
   }
+ 
+  .stats-bar{
+    grid-column: 2;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.4px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line-minor);
+  }
+  .stats-bar b{ color: var(--ink); }
+ 
+  .win-banner{
+    grid-column: 2;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-size: 12px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    display: none;
+  }
+  .win-banner.show{ display: block; }
  
   /* ---------- Control panel ---------- */
   .panel{
@@ -258,10 +319,25 @@
   button:hover{ border-color: var(--amber); color: var(--amber); }
   button:focus-visible{ outline: 2px solid var(--cyan); outline-offset: 2px; }
   button.active{ border-color: var(--amber); color: var(--amber); background: rgba(242,166,90,0.08); }
+  button:disabled{ opacity: 0.35; cursor: not-allowed; }
+  button:disabled:hover{ border-color: var(--line-minor); color: var(--ink); }
  
   .btn-full{ width: 100%; margin-bottom: 8px; }
   .btn-primary{ border-color: var(--cyan); color: var(--cyan); }
   .btn-primary:hover{ background: rgba(111,231,221,0.10); }
+ 
+  .row-2{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+ 
+  .numpad{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+  .numpad button{ padding: 12px 4px; font-size: 14px; }
+  .numpad button.erase{ color: var(--red); border-color: var(--line-minor); grid-column: span 1; }
+ 
+  .notes-toggle{ width: 100%; margin-bottom: 10px; }
+  .notes-toggle.active{ border-color: var(--cyan); color: var(--cyan); background: rgba(111,231,221,0.10); }
  
   .log{
     background: var(--bg);
@@ -278,6 +354,7 @@
   .log .line.ok{ color: var(--cyan); }
   .log .line.warn{ color: var(--amber); }
   .log .line.err{ color: var(--red); }
+  .log .line.win{ color: var(--green); }
   .log .line::before{ content: "> "; color: var(--muted-dim); }
  
   footer{
@@ -330,6 +407,26 @@
           <span>81 CELLS</span>
           <span id="fillCount">0 GIVEN</span>
         </div>
+        <div class="stats-bar">
+          <span>TIME <b id="timerDisplay">00:00</b></span>
+          <span>MOVES <b id="moveCount">0</b></span>
+        </div>
+        <div class="win-banner" id="winBanner">✓ solved — grid complete and valid</div>
+ 
+        <div class="section" style="margin-top:18px;">
+          <div class="numpad" id="numpad">
+            <button type="button" class="num-btn" data-num="1">1</button>
+            <button type="button" class="num-btn" data-num="2">2</button>
+            <button type="button" class="num-btn" data-num="3">3</button>
+            <button type="button" class="num-btn" data-num="4">4</button>
+            <button type="button" class="num-btn" data-num="5">5</button>
+            <button type="button" class="num-btn" data-num="6">6</button>
+            <button type="button" class="num-btn" data-num="7">7</button>
+            <button type="button" class="num-btn" data-num="8">8</button>
+            <button type="button" class="num-btn" data-num="9">9</button>
+            <button type="button" class="erase" id="btnErase">⌫</button>
+          </div>
+        </div>
       </div>
  
       <div class="panel">
@@ -347,6 +444,11 @@
           <button type="button" class="btn-full btn-primary" id="btnGenerate">Generate puzzle</button>
           <button type="button" class="btn-full" id="btnSolve">Solve current grid</button>
           <button type="button" class="btn-full" id="btnReveal">Reveal solution</button>
+          <div class="row-2">
+            <button type="button" id="btnHint">Hint</button>
+            <button type="button" id="btnUndo">Undo</button>
+          </div>
+          <button type="button" class="notes-toggle" id="btnNotes">Notes: off</button>
           <button type="button" class="btn-full" id="btnClear">Clear grid</button>
         </div>
  
@@ -361,7 +463,7 @@
     </div>
  
     <footer>
-      Numbers you type count as givens (bold, ink). Solver output is shown in cyan. Amber marks the grid registration corner.
+      Numbers you type count as givens (bold, ink). Solver output is shown in cyan, hints in amber. Tap a cell then use the number pad — toggle Notes to pencil in candidates.
     </footer>
   </div>
 </div>
@@ -372,10 +474,26 @@
   const boardEl = document.getElementById('board');
   const logEl = document.getElementById('log');
   const fillCountEl = document.getElementById('fillCount');
+  const timerDisplayEl = document.getElementById('timerDisplay');
+  const moveCountEl = document.getElementById('moveCount');
+  const winBannerEl = document.getElementById('winBanner');
   const diffBtns = document.querySelectorAll('.diff-btn');
+  const notesBtn = document.getElementById('btnNotes');
+ 
   let currentLevel = 'easy';
-  let solutionGrid = null; // last known full solution, if any
-  let cells = []; // DOM refs [row][col]
+  let solutionGrid = null;   // last known full solution, if any
+  let cells = [];            // input DOM refs [row][col]
+  let wraps = [];            // wrapper DOM refs [row][col]
+  let notesEls = [];         // notes overlay DOM refs [row][col]
+  let notesData = [];        // notesData[row][col] = Set of numbers
+  let givenMask = [];        // givenMask[row][col] = true if not editable
+  let selected = null;       // {r,c}
+  let notesMode = false;
+  let moveCount = 0;
+  let timerSeconds = 0;
+  let timerInterval = null;
+  let history = [];          // undo stack of {grid, notes, moveCount}
+  let wonAlready = false;
  
   const REMOVE_COUNT = { easy: 32, medium: 42, hard: 52 };
  
@@ -389,37 +507,114 @@
   }
   function clearLog(){ logEl.innerHTML = ''; }
  
+  // ---------- timer ----------
+  function formatTime(s){
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const sec = (s % 60).toString().padStart(2, '0');
+    return m + ':' + sec;
+  }
+  function startTimer(){
+    if(timerInterval) return;
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      timerDisplayEl.textContent = formatTime(timerSeconds);
+    }, 1000);
+  }
+  function stopTimer(){
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  function resetTimer(){
+    stopTimer();
+    timerSeconds = 0;
+    timerDisplayEl.textContent = formatTime(0);
+  }
+ 
+  function resetMoves(){
+    moveCount = 0;
+    moveCountEl.textContent = '0';
+  }
+  function bumpMoves(){
+    moveCount++;
+    moveCountEl.textContent = String(moveCount);
+  }
+ 
+  function hideWinBanner(){
+    winBannerEl.classList.remove('show');
+    wonAlready = false;
+  }
+ 
   // ---------- board construction ----------
   function buildBoard(){
     boardEl.innerHTML = '';
-    cells = [];
+    cells = []; wraps = []; notesEls = []; notesData = []; givenMask = [];
     for(let r=0;r<SIZE;r++){
-      const row = [];
+      const cellRow = [], wrapRow = [], notesRow = [], noteDataRow = [], givenRow = [];
       for(let c=0;c<SIZE;c++){
+        const wrap = document.createElement('div');
+        wrap.className = 'cell-wrap';
+        if((r+1) % 3 === 0 && r !== 8) wrap.classList.add('row-thick');
+ 
+        const notesEl = document.createElement('div');
+        notesEl.className = 'notes';
+        for(let n=1;n<=9;n++){
+          const s = document.createElement('span');
+          notesEl.appendChild(s);
+        }
+ 
         const input = document.createElement('input');
         input.type = 'text';
         input.inputMode = 'numeric';
         input.maxLength = 1;
         input.className = 'cell';
         input.setAttribute('aria-label', 'Row ' + (r+1) + ' column ' + (c+1));
-        if((r+1) % 3 === 0 && r !== 8) input.classList.add('row-thick');
         input.addEventListener('input', () => onCellInput(input, r, c));
         input.addEventListener('keydown', (e) => onCellKeydown(e, r, c));
-        boardEl.appendChild(input);
-        row.push(input);
+        input.addEventListener('focus', () => selectCell(r, c));
+ 
+        wrap.appendChild(notesEl);
+        wrap.appendChild(input);
+        boardEl.appendChild(wrap);
+ 
+        cellRow.push(input);
+        wrapRow.push(wrap);
+        notesRow.push(notesEl);
+        noteDataRow.push(new Set());
+        givenRow.push(false);
       }
-      cells.push(row);
+      cells.push(cellRow);
+      wraps.push(wrapRow);
+      notesEls.push(notesRow);
+      notesData.push(noteDataRow);
+      givenMask.push(givenRow);
     }
+  }
+ 
+  function selectCell(r, c){
+    if(selected){ wraps[selected.r][selected.c].classList.remove('selected'); }
+    selected = { r, c };
+    wraps[r][c].classList.add('selected');
   }
  
   function onCellInput(input, r, c){
     let v = input.value.replace(/[^1-9]/g, '');
     input.value = v;
-    input.classList.remove('solved', 'invalid');
-    if(v) input.classList.add('given'); else input.classList.remove('given');
+    if(givenMask[r][c]) return; // safety, given cells are readOnly anyway
+    pushHistory();
+    input.classList.remove('solved', 'invalid', 'hinted');
+    if(v){
+      input.classList.add('given');
+      notesData[r][c].clear();
+      renderNotes(r, c);
+      bumpMoves();
+    } else {
+      input.classList.remove('given');
+    }
     solutionGrid = null;
     updateFillCount();
     validateBoardVisual();
+    if(!timerInterval && !wonAlready) startTimer();
+    checkWin();
   }
  
   function onCellKeydown(e, r, c){
@@ -460,18 +655,67 @@
       for(let c=0;c<SIZE;c++){
         const val = grid[r][c];
         const el = cells[r][c];
-        el.classList.remove('given','solved','invalid');
+        el.classList.remove('given','solved','invalid','hinted');
+        el.readOnly = false;
+        givenMask[r][c] = false;
         if(val === 0){
           el.value = '';
         } else {
           el.value = val;
-          if(opts.markGivenIf && opts.markGivenIf(r,c)) el.classList.add('given');
+          if(opts.markGivenIf && opts.markGivenIf(r,c)){
+            el.classList.add('given');
+            el.readOnly = true;
+            givenMask[r][c] = true;
+          }
           else if(opts.markSolved) el.classList.add('solved');
         }
+        notesData[r][c].clear();
+        renderNotes(r, c);
       }
     }
     updateFillCount();
   }
+ 
+  function renderNotes(r, c){
+    const spans = notesEls[r][c].children;
+    const set = notesData[r][c];
+    const hasValue = !!cells[r][c].value;
+    for(let n=1;n<=9;n++){
+      spans[n-1].textContent = (!hasValue && set.has(n)) ? n : '';
+    }
+  }
+ 
+  // ---------- undo ----------
+  function pushHistory(){
+    history.push({
+      grid: readGrid(),
+      notes: notesData.map(row => row.map(s => new Set(s))),
+      moves: moveCount
+    });
+    if(history.length > 50) history.shift();
+  }
+ 
+  document.getElementById('btnUndo').addEventListener('click', () => {
+    if(history.length === 0){ log('nothing to undo', 'warn'); return; }
+    const prev = history.pop();
+    for(let r=0;r<SIZE;r++){
+      for(let c=0;c<SIZE;c++){
+        if(givenMask[r][c]) continue;
+        const v = prev.grid[r][c];
+        cells[r][c].value = v ? v : '';
+        cells[r][c].classList.remove('solved','invalid','hinted');
+        if(v) cells[r][c].classList.add('given'); else cells[r][c].classList.remove('given');
+        notesData[r][c] = new Set(prev.notes[r][c]);
+        renderNotes(r, c);
+      }
+    }
+    moveCount = prev.moves;
+    moveCountEl.textContent = String(moveCount);
+    updateFillCount();
+    validateBoardVisual();
+    hideWinBanner();
+    log('undone last move');
+  });
  
   // ---------- validity helpers (mirrors isValid in the C++ source) ----------
   function isValid(grid, row, col, num){
@@ -493,6 +737,7 @@
     let anyInvalid = false;
     for(let r=0;r<SIZE;r++){
       for(let c=0;c<SIZE;c++){
+        cells[r][c].classList.remove('invalid');
         const v = grid[r][c];
         if(!v) continue;
         grid[r][c] = 0;
@@ -502,6 +747,19 @@
       }
     }
     return !anyInvalid;
+  }
+ 
+  function checkWin(){
+    const grid = readGrid();
+    for(let r=0;r<SIZE;r++) for(let c=0;c<SIZE;c++) if(grid[r][c] === 0) return false;
+    if(!validateBoardVisual()) return false;
+    if(!wonAlready){
+      wonAlready = true;
+      stopTimer();
+      winBannerEl.classList.add('show');
+      log('grid complete — every row, column and box checks out', 'win');
+    }
+    return true;
   }
  
   // ---------- solver (recursive backtracking, same shape as solveSudoku) ----------
@@ -573,6 +831,14 @@
     return { puzzle, solution };
   }
  
+  function currentSolution(){
+    if(solutionGrid) return solutionGrid;
+    const copy = readGrid();
+    if(!solveSudoku(copy)) return null;
+    solutionGrid = copy;
+    return solutionGrid;
+  }
+ 
   // ---------- UI wiring ----------
   diffBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -590,6 +856,11 @@
     solutionGrid = solution;
     writeGrid(puzzle, { markGivenIf: () => true });
     validateBoardVisual();
+    history = [];
+    resetMoves();
+    resetTimer();
+    startTimer();
+    hideWinBanner();
     log('puzzle ready — ' + REMOVE_COUNT[currentLevel] + ' cells cleared', 'ok');
   });
  
@@ -608,6 +879,7 @@
         markGivenIf: (r,c) => before[r][c] !== 0,
         markSolved: true
       });
+      stopTimer();
       log('solved', 'ok');
     } else {
       log('no solution exists for this grid', 'err');
@@ -615,21 +887,50 @@
   });
  
   document.getElementById('btnReveal').addEventListener('click', () => {
-    if(!solutionGrid){
-      const grid = readGrid();
-      if(!validateBoardVisual()){
-        log('grid has a conflicting number — fix it first', 'err');
-        return;
-      }
-      const copy = grid.map(row => row.slice());
-      if(!solveSudoku(copy)){
-        log('no solution exists for this grid', 'err');
-        return;
-      }
-      solutionGrid = copy;
+    const solution = currentSolution();
+    if(!solution){
+      log('no solution exists for this grid', 'err');
+      return;
     }
-    writeGrid(solutionGrid, { markSolved: true });
+    writeGrid(solution, { markSolved: true });
+    stopTimer();
     log('solution revealed', 'ok');
+  });
+ 
+  document.getElementById('btnHint').addEventListener('click', () => {
+    const solution = currentSolution();
+    if(!solution){
+      log('no solution exists for this grid — fix conflicts first', 'err');
+      return;
+    }
+    let target = null;
+    if(selected && !givenMask[selected.r][selected.c] && !cells[selected.r][selected.c].value){
+      target = selected;
+    } else {
+      outer:
+      for(let r=0;r<SIZE;r++){
+        for(let c=0;c<SIZE;c++){
+          if(!givenMask[r][c] && !cells[r][c].value){ target = {r,c}; break outer; }
+        }
+      }
+    }
+    if(!target){
+      log('no empty cell left for a hint', 'warn');
+      return;
+    }
+    pushHistory();
+    const { r, c } = target;
+    cells[r][c].value = solution[r][c];
+    cells[r][c].classList.remove('invalid','solved');
+    cells[r][c].classList.add('hinted');
+    notesData[r][c].clear();
+    renderNotes(r, c);
+    bumpMoves();
+    updateFillCount();
+    validateBoardVisual();
+    selectCell(r, c);
+    log('hint placed at row ' + (r+1) + ', column ' + (c+1), 'ok');
+    checkWin();
   });
  
   document.getElementById('btnClear').addEventListener('click', () => {
@@ -637,7 +938,63 @@
     solutionGrid = null;
     const empty = Array.from({length:SIZE}, () => new Array(SIZE).fill(0));
     writeGrid(empty);
+    history = [];
+    resetMoves();
+    resetTimer();
+    hideWinBanner();
     log('grid cleared');
+  });
+ 
+  notesBtn.addEventListener('click', () => {
+    notesMode = !notesMode;
+    notesBtn.classList.toggle('active', notesMode);
+    notesBtn.textContent = 'Notes: ' + (notesMode ? 'on' : 'off');
+  });
+ 
+  function applyNumpad(num){
+    if(!selected){ log('tap a cell first', 'warn'); return; }
+    const { r, c } = selected;
+    if(givenMask[r][c]){ log('that cell is a given — pick an empty one', 'warn'); return; }
+    pushHistory();
+    if(notesMode){
+      if(cells[r][c].value){ log('clear the cell before adding notes', 'warn'); return; }
+      const set = notesData[r][c];
+      if(set.has(num)) set.delete(num); else set.add(num);
+      renderNotes(r, c);
+    } else {
+      cells[r][c].value = String(num);
+      cells[r][c].classList.remove('solved','invalid','hinted');
+      cells[r][c].classList.add('given');
+      notesData[r][c].clear();
+      renderNotes(r, c);
+      solutionGrid = null;
+      updateFillCount();
+      validateBoardVisual();
+      bumpMoves();
+      if(!timerInterval && !wonAlready) startTimer();
+      checkWin();
+    }
+  }
+ 
+  document.getElementById('numpad').addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    if(btn.id === 'btnErase'){
+      if(!selected){ log('tap a cell first', 'warn'); return; }
+      const { r, c } = selected;
+      if(givenMask[r][c]){ log('that cell is a given — pick an empty one', 'warn'); return; }
+      pushHistory();
+      cells[r][c].value = '';
+      cells[r][c].classList.remove('given','solved','invalid','hinted');
+      notesData[r][c].clear();
+      renderNotes(r, c);
+      updateFillCount();
+      validateBoardVisual();
+      hideWinBanner();
+      return;
+    }
+    const num = parseInt(btn.dataset.num, 10);
+    if(num) applyNumpad(num);
   });
  
   buildBoard();
